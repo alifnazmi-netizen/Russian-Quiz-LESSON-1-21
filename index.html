@@ -1,0 +1,1319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Russian vocab · quiz</title>
+<style>
+    * { box-sizing: border-box; font-family: 'Segoe UI', Roboto, system-ui, sans-serif; }
+    body { background: #f0f3f8; display: flex; justify-content: center; padding: 20px; margin: 0; min-height: 100vh; }
+    .app { max-width: 950px; width: 100%; background: #ffffff; border-radius: 40px; box-shadow: 0 20px 40px rgba(0,20,30,0.12); padding: 30px 30px 40px; position: relative; }
+    h1 { font-weight: 600; font-size: 2rem; margin-top: 0; margin-bottom: 0.5rem; color: #1a2b4c; letter-spacing: -0.02em; display: flex; align-items: center; gap: 10px; }
+    h1 small { font-size: 1rem; font-weight: 400; color: #6b7a8f; margin-left: auto; }
+    .lesson-grid { display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0 10px; }
+    .lesson-btn { background: #e9ecf3; border: none; border-radius: 60px; padding: 12px 22px; font-weight: 500; font-size: 1rem; cursor: pointer; color: #1e2f4a; transition: 0.15s; }
+    .lesson-btn:hover { background: #d0d9e7; transform: scale(0.97); }
+    .lesson-btn.active { background: #1a2b4c; color: white; }
+    .picture-panel { background: #f9fbfe; border-radius: 28px; padding: 20px 25px; margin: 25px 0 20px; border: 1px solid #dee5f0; }
+    .picture-panel h2 { font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.03em; color: #3d5270; margin-top: 0; margin-bottom: 15px; font-weight: 500; display:flex; justify-content:space-between; align-items:center; }
+    .vocab-picture { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px 16px; }
+    .vocab-item { background: white; padding: 8px 12px; border-radius: 40px; border: 1px solid #d9e2ef; font-size: 0.9rem; color: #1e2f4a; display: flex; flex-direction: column; align-items: center; text-align: center; cursor: pointer; transition: 0.15s; position: relative; user-select: none; }
+    .vocab-item:hover { background: #eef3fc; border-color: #a9bbd4; transform: scale(0.98); }
+    .vocab-item:active { background: #dde7f6; transform: scale(0.96); }
+    .vocab-item.playing { background: #c8f0d1; border-color: #2e9b5e; }
+    .vocab-item .ru { font-weight: 600; color: #0d2742; display: flex; align-items: center; gap: 4px; }
+    .vocab-item .ru::after { content: "🔊"; font-size: 0.7rem; opacity: 0.4; }
+    .vocab-item.playing .ru::after { opacity: 1; }
+    .vocab-item .en { color: #6d7f97; font-size: 0.8rem; }
+    .expand-btn { background: #dbe4f0; border: none; border-radius: 40px; padding: 6px 18px; font-size: 0.85rem; font-weight: 600; color: #1a2b4c; cursor: pointer; }
+    .expand-btn:hover { background: #c8d5e8; }
+    .quiz-types { display: flex; gap: 15px; flex-wrap: wrap; margin: 15px 0 20px; }
+    .type-btn { background: white; border: 2px solid #cbd5e3; border-radius: 60px; padding: 14px 26px; font-weight: 600; font-size: 1rem; color: #1f3a5f; cursor: pointer; transition: 0.15s; flex: 1 1 auto; }
+    .type-btn:hover { background: #eef3fc; border-color: #1a2b4c; }
+    .type-btn.active { background: #1a2b4c; border-color: #1a2b4c; color: white; }
+    .quiz-area { margin-top: 30px; border-top: 2px solid #eef2f7; padding-top: 25px; }
+    .progress { font-size: 0.9rem; color: #667e9e; margin-bottom: 16px; display: flex; justify-content: space-between; }
+    .question-box { background: #f4f8ff; border-radius: 28px; padding: 30px 25px; margin-bottom: 25px; }
+    .question-text { font-size: 1.8rem; font-weight: 600; color: #0b1a30; display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
+    .speaker-btn { background: #d9e2f0; border: none; border-radius: 50%; width: 48px; height: 48px; font-size: 1.6rem; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; color: #1a2b4c; }
+    .speaker-btn:hover { background: #c2d0e6; }
+    .options { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 25px 0 10px; }
+    .option-btn { background: white; border: 2px solid #d7e0ed; border-radius: 40px; padding: 16px 18px; font-size: 1.1rem; font-weight: 500; color: #152c46; cursor: pointer; transition: 0.1s; text-align: left; }
+    .option-btn:hover:not(:disabled) { background: #e5edfa; border-color: #a9bbd4; }
+    .option-btn.correct { background: #c8f0d1; border-color: #2e9b5e; color: #0a3d1e; }
+    .option-btn.wrong { background: #ffe0e0; border-color: #c73b3b; color: #671111; }
+    .option-btn:disabled { opacity: 0.85; cursor: default; }
+    .input-area { display: flex; flex-direction: column; gap: 14px; margin: 15px 0 5px; }
+    .input-area input { padding: 18px 22px; font-size: 1.3rem; border-radius: 60px; border: 2px solid #d0dbea; background: white; outline: none; font-weight: 500; color: #122b44; }
+    .input-area input:focus { border-color: #1a2b4c; }
+    .btn-primary { background: #1a2b4c; color: white; border: none; border-radius: 60px; padding: 16px 28px; font-size: 1.1rem; font-weight: 600; cursor: pointer; align-self: flex-start; }
+    .btn-primary:hover:not(:disabled) { background: #0d1d33; }
+    .btn-primary:disabled { background: #a5b3c9; cursor: default; }
+    .feedback { margin-top: 16px; font-size: 1rem; font-weight: 500; min-height: 1.8rem; color: #325076; }
+    .feedback.correct { color: #1f7a4a; }
+    .feedback.wrong { color: #b23b3b; }
+    .hidden { display: none !important; }
+    .reset-btn { background: transparent; border: 1px solid #b8c6da; border-radius: 40px; padding: 8px 18px; color: #3b5370; font-weight: 500; cursor: pointer; font-size: 0.9rem; }
+    .reset-btn:hover { background: #eef3fc; }
+</style>
+</head>
+<body>
+<div class="app">
+    <h1>🇷🇺 Russian vocab <small>Lessons 1–21</small></h1>
+
+    <div id="lessonSection">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin:15px 0 5px;">
+            <span style="font-weight:500; color:#2e456b;">Choose a lesson</span>
+            <span id="lessonCount" style="font-size:0.9rem; color:#6b7f9b;"></span>
+        </div>
+        <div class="lesson-grid" id="lessonGrid"></div>
+    </div>
+
+    <div id="picturePanel" class="picture-panel hidden">
+        <h2>
+            <span>📸 Vocabulary · <span id="picLessonName"></span></span>
+            <button class="expand-btn" id="expandBtn">Show all</button>
+        </h2>
+        <div id="vocabPicture" class="vocab-picture"></div>
+        <div style="font-size:0.8rem; color:#7b8da0; margin-top:12px; text-align:center;">👆 Tap any word to hear it in Russian</div>
+    </div>
+
+    <div id="quizTypeSection" class="hidden">
+        <div style="font-weight:500; color:#2e456b; margin-bottom:10px;">Select quiz type</div>
+        <div class="quiz-types">
+            <button class="type-btn" data-type="ru-en">🇷🇺 → 🇬🇧  Russian → English</button>
+            <button class="type-btn" data-type="en-ru">🇬🇧 → 🇷🇺  English → Russian</button>
+            <button class="type-btn" data-type="write-ru">✍️  Write in Russian</button>
+        </div>
+        <div style="font-size:0.85rem; color:#6b7f9b; margin-top:8px;" id="quizInfo"></div>
+    </div>
+
+    <div id="quizContainer" class="quiz-area hidden">
+        <div class="progress">
+            <span id="progressText">Question 1 of 10</span>
+            <span id="retryInfo"></span>
+        </div>
+        <div class="question-box">
+            <div class="question-text" id="questionText"></div>
+        </div>
+        <div id="optionsContainer" class="options"></div>
+        <div id="inputContainer" class="input-area hidden">
+            <input type="text" id="answerInput" placeholder="Type in Russian..." autocomplete="off">
+            <button class="btn-primary" id="submitAnswerBtn">Check</button>
+        </div>
+        <div id="feedbackMessage" class="feedback"></div>
+        <div style="display:flex; gap:12px; margin-top:20px;">
+            <button class="reset-btn" id="restartQuizBtn">⟲ Restart quiz</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ============================================================
+//  VOCABULARY DATA — Lessons 1–21
+// ============================================================
+const rawVocab = [
+    // LESSON 1
+    { ru: "Здравствуйте!", en: "Hello! (polite form or plural)", lesson: 1 },
+    { ru: "Доброе утро!", en: "Good morning!", lesson: 1 },
+    { ru: "Добрый день!", en: "Good afternoon!", lesson: 1 },
+    { ru: "Добрый вечер!", en: "Good evening!", lesson: 1 },
+    { ru: "Привет!", en: "Hello! Hi! (informal form)", lesson: 1 },
+    { ru: "До свидания!", en: "Goodbye!", lesson: 1 },
+    { ru: "Пока!", en: "Bye!", lesson: 1 },
+    { ru: "я", en: "I", lesson: 1 },
+    { ru: "ты", en: "you", lesson: 1 },
+    { ru: "он", en: "he", lesson: 1 },
+    { ru: "она", en: "she", lesson: 1 },
+    { ru: "мы", en: "we", lesson: 1 },
+    { ru: "вы", en: "you (polite form or plural)", lesson: 1 },
+    { ru: "они", en: "they", lesson: 1 },
+    { ru: "кто", en: "who", lesson: 1 },
+    { ru: "Кто это?", en: "Who is it?", lesson: 1 },
+    { ru: "Это я (ты, он, она)", en: "It is me (you, he, she)", lesson: 1 },
+    { ru: "Как вас зовут?", en: "What is your name?", lesson: 1 },
+    { ru: "Меня зовут Стив.", en: "My name is Steve.", lesson: 1 },
+    { ru: "Как его зовут?", en: "What is his name?", lesson: 1 },
+    { ru: "Как её зовут?", en: "What is her name?", lesson: 1 },
+    { ru: "Его зовут Стив.", en: "His name is Steve.", lesson: 1 },
+    { ru: "Её зовут Наташа.", en: "Her name is Natasha.", lesson: 1 },
+    { ru: "Очень приятно.", en: "Nice to meet you.", lesson: 1 },
+    { ru: "Спасибо!", en: "Thank you!", lesson: 1 },
+    { ru: "Пожалуйста!", en: "Please! You're welcome!", lesson: 1 },
+    { ru: "Извините!", en: "Sorry! Excuse me!", lesson: 1 },
+    { ru: "Как дела?", en: "How are you?", lesson: 1 },
+    { ru: "Хорошо! Нормально!", en: "Fine!", lesson: 1 },
+    { ru: "Плохо!", en: "Bad!", lesson: 1 },
+    { ru: "Так себе!", en: "So-so!", lesson: 1 },
+    { ru: "Можно?", en: "May I?", lesson: 1 },
+    { ru: "Можно кофе?", en: "May I have some coffee?", lesson: 1 },
+    { ru: "Я знаю.", en: "I know.", lesson: 1 },
+    { ru: "Я не знаю.", en: "I don't know.", lesson: 1 },
+    { ru: "Я понимаю.", en: "I understand.", lesson: 1 },
+    { ru: "Я не понимаю.", en: "I don't understand.", lesson: 1 },
+    { ru: "Извините, я не говорю по-русски.", en: "Sorry, I don't speak Russian.", lesson: 1 },
+    { ru: "Счёт, пожалуйста!", en: "Check, please!", lesson: 1 },
+    { ru: "Что это?", en: "What is it?", lesson: 1 },
+    { ru: "Это хлеб.", en: "This is bread.", lesson: 1 },
+    { ru: "сыр", en: "cheese", lesson: 1 },
+    { ru: "чай", en: "tea", lesson: 1 },
+    { ru: "сок", en: "juice", lesson: 1 },
+    { ru: "лук", en: "onion", lesson: 1 },
+    { ru: "соль", en: "salt", lesson: 1 },
+    { ru: "кофе", en: "coffee", lesson: 1 },
+    { ru: "вода", en: "water", lesson: 1 },
+    { ru: "пиво", en: "beer", lesson: 1 },
+    { ru: "вино", en: "wine", lesson: 1 },
+    { ru: "яйцо (яйца)", en: "egg (eggs)", lesson: 1 },
+    { ru: "рыба", en: "fish", lesson: 1 },
+    { ru: "мясо", en: "meat", lesson: 1 },
+    { ru: "курица", en: "chicken", lesson: 1 },
+    { ru: "масло", en: "oil, butter", lesson: 1 },
+    { ru: "сахар", en: "sugar", lesson: 1 },
+    { ru: "колбаса", en: "sausage", lesson: 1 },
+    { ru: "шоколад", en: "chocolate", lesson: 1 },
+    { ru: "печёные", en: "cookie(s)", lesson: 1 },
+    { ru: "молоко", en: "milk", lesson: 1 },
+    { ru: "яблоко (яблоки)", en: "apple (apples)", lesson: 1 },
+    { ru: "свёкла", en: "beet", lesson: 1 },
+    { ru: "капуста", en: "cabbage", lesson: 1 },
+    { ru: "морковь", en: "carrot", lesson: 1 },
+    { ru: "картошка", en: "potato", lesson: 1 },
+    { ru: "огурец (огурцы)", en: "cucumber (cucumbers)", lesson: 1 },
+    { ru: "апельсин", en: "orange", lesson: 1 },
+    { ru: "помидор", en: "tomato", lesson: 1 },
+    { ru: "я ем", en: "I eat", lesson: 1 },
+    { ru: "я люблю", en: "I like", lesson: 1 },
+    { ru: "один", en: "1", lesson: 1 },
+    { ru: "два", en: "2", lesson: 1 },
+    { ru: "три", en: "3", lesson: 1 },
+    { ru: "четыре", en: "4", lesson: 1 },
+    { ru: "пять", en: "5", lesson: 1 },
+    { ru: "шесть", en: "6", lesson: 1 },
+    { ru: "семь", en: "7", lesson: 1 },
+    { ru: "восемь", en: "8", lesson: 1 },
+    { ru: "дёвять", en: "9", lesson: 1 },
+    { ru: "дёсять", en: "10", lesson: 1 },
+    { ru: "одиннадцать", en: "11", lesson: 1 },
+    { ru: "двенадцать", en: "12", lesson: 1 },
+    { ru: "тринадцать", en: "13", lesson: 1 },
+    { ru: "четырнадцать", en: "14", lesson: 1 },
+    { ru: "пятнадцать", en: "15", lesson: 1 },
+    { ru: "шестнадцать", en: "16", lesson: 1 },
+    { ru: "семнадцать", en: "17", lesson: 1 },
+    { ru: "восемнадцать", en: "18", lesson: 1 },
+    { ru: "девятнадцать", en: "19", lesson: 1 },
+    { ru: "двадцать", en: "20", lesson: 1 },
+    { ru: "тридцать", en: "30", lesson: 1 },
+    { ru: "сорок", en: "40", lesson: 1 },
+    { ru: "пятьдесят", en: "50", lesson: 1 },
+    { ru: "шестьдесят", en: "60", lesson: 1 },
+    { ru: "семьдесят", en: "70", lesson: 1 },
+    { ru: "восемьдесят", en: "80", lesson: 1 },
+    { ru: "девяносто", en: "90", lesson: 1 },
+    { ru: "сто", en: "100", lesson: 1 },
+    { ru: "ноль", en: "0", lesson: 1 },
+
+    // LESSON 2
+    { ru: "двёсти", en: "200", lesson: 2 },
+    { ru: "триста", en: "300", lesson: 2 },
+    { ru: "четыреста", en: "400", lesson: 2 },
+    { ru: "пятьсот", en: "500", lesson: 2 },
+    { ru: "шестьсот", en: "600", lesson: 2 },
+    { ru: "семьсот", en: "700", lesson: 2 },
+    { ru: "восемьсот", en: "800", lesson: 2 },
+    { ru: "девятьсот", en: "900", lesson: 2 },
+    { ru: "тысяча", en: "1000", lesson: 2 },
+    { ru: "дёньги", en: "money", lesson: 2 },
+    { ru: "Сколько стоит ... ?", en: "How much is ... ?", lesson: 2 },
+    { ru: "Где?", en: "Where?", lesson: 2 },
+    { ru: "сдáча: Возьмите сдáчу", en: "change: Here is your change", lesson: 2 },
+    { ru: "тут = здесь", en: "here", lesson: 2 },
+    { ru: "там", en: "there", lesson: 2 },
+    { ru: "слёва", en: "on the left", lesson: 2 },
+    { ru: "справа", en: "on the right", lesson: 2 },
+    { ru: "прямо", en: "straight ahead", lesson: 2 },
+    { ru: "рядом", en: "next to, close", lesson: 2 },
+    { ru: "налёво", en: "to the left", lesson: 2 },
+    { ru: "направо", en: "to the right", lesson: 2 },
+    { ru: "ценá", en: "price", lesson: 2 },
+    { ru: "пакёт", en: "bag", lesson: 2 },
+    { ru: "наличные", en: "cash", lesson: 2 },
+    { ru: "карта", en: "card", lesson: 2 },
+    { ru: "вход", en: "entrance", lesson: 2 },
+    { ru: "выход", en: "exit", lesson: 2 },
+    { ru: "переход", en: "crossing", lesson: 2 },
+    { ru: "книга", en: "book", lesson: 2 },
+    { ru: "газета", en: "newspaper", lesson: 2 },
+    { ru: "журнал", en: "magazine", lesson: 2 },
+    { ru: "словарь", en: "dictionary", lesson: 2 },
+    { ru: "тетрадь [т']", en: "notebook", lesson: 2 },
+    { ru: "бумага", en: "paper", lesson: 2 },
+    { ru: "карандаш", en: "pencil", lesson: 2 },
+    { ru: "ручка", en: "pen", lesson: 2 },
+    { ru: "урок", en: "lesson, class", lesson: 2 },
+    { ru: "машина", en: "car", lesson: 2 },
+    { ru: "дом", en: "house", lesson: 2 },
+    { ru: "улица", en: "street", lesson: 2 },
+    { ru: "площадь", en: "square", lesson: 2 },
+    { ru: "магазин", en: "shop, store", lesson: 2 },
+    { ru: "ресторан", en: "restaurant", lesson: 2 },
+    { ru: "университет", en: "university", lesson: 2 },
+    { ru: "вилка", en: "fork", lesson: 2 },
+    { ru: "нож [ш]", en: "knife", lesson: 2 },
+    { ru: "ложка [ш]", en: "spoon", lesson: 2 },
+    { ru: "тарёлка", en: "plate", lesson: 2 },
+    { ru: "чашка", en: "cup", lesson: 2 },
+    { ru: "стакан", en: "glass", lesson: 2 },
+    { ru: "комната", en: "room", lesson: 2 },
+    { ru: "квартира", en: "apartment", lesson: 2 },
+    { ru: "стол", en: "table, desk", lesson: 2 },
+    { ru: "стул", en: "chair", lesson: 2 },
+    { ru: "окно", en: "window", lesson: 2 },
+    { ru: "дверь", en: "door", lesson: 2 },
+    { ru: "мужчина", en: "man", lesson: 2 },
+    { ru: "жёнщина", en: "woman", lesson: 2 },
+    { ru: "молодой человек", en: "young man", lesson: 2 },
+    { ru: "дёвушка", en: "girl", lesson: 2 },
+    { ru: "мальчик", en: "boy", lesson: 2 },
+    { ru: "дёвочка", en: "small girl", lesson: 2 },
+    { ru: "человек", en: "person", lesson: 2 },
+    { ru: "люди", en: "people", lesson: 2 },
+    { ru: "друг", en: "friend (male)", lesson: 2 },
+    { ru: "подруга", en: "friend (female)", lesson: 2 },
+    { ru: "друзья", en: "friends", lesson: 2 },
+    { ru: "студент", en: "student (male)", lesson: 2 },
+    { ru: "студентка", en: "student (female)", lesson: 2 },
+    { ru: "преподаватель", en: "teacher", lesson: 2 },
+    { ru: "семья", en: "family", lesson: 2 },
+    { ru: "жена", en: "wife", lesson: 2 },
+    { ru: "муж", en: "husband", lesson: 2 },
+    { ru: "мать (мама)", en: "mother", lesson: 2 },
+    { ru: "отец (папа)", en: "father", lesson: 2 },
+    { ru: "дочь", en: "daughter", lesson: 2 },
+    { ru: "сын", en: "son", lesson: 2 },
+    { ru: "сестра", en: "sister", lesson: 2 },
+    { ru: "брат", en: "brother", lesson: 2 },
+    { ru: "родители", en: "parents", lesson: 2 },
+    { ru: "дети", en: "children", lesson: 2 },
+    { ru: "дёдушка", en: "grandfather", lesson: 2 },
+    { ru: "бабушка", en: "grandmother", lesson: 2 },
+    { ru: "внук", en: "grandson", lesson: 2 },
+    { ru: "внучка", en: "granddaughter", lesson: 2 },
+
+    // LESSON 3
+    { ru: "мой, моя, моё", en: "my", lesson: 3 },
+    { ru: "твой, твоя, твоё", en: "your", lesson: 3 },
+    { ru: "наш, наша, наше", en: "our", lesson: 3 },
+    { ru: "ваш, ваша, ваше", en: "your", lesson: 3 },
+    { ru: "его", en: "his", lesson: 3 },
+    { ru: "её", en: "her", lesson: 3 },
+    { ru: "их", en: "their", lesson: 3 },
+    { ru: "чей, чья, чьё", en: "whose", lesson: 3 },
+    { ru: "письмо", en: "letter", lesson: 3 },
+    { ru: "Как по-русски «spoon»?", en: "How do you say \"spoon\" in Russian?", lesson: 3 },
+    { ru: "Что такое «ложка»?", en: "What is a \"ложка\"?", lesson: 3 },
+    { ru: "Что значит «ложка»?", en: "What does the word \"ложка\" mean?", lesson: 3 },
+    { ru: "понедельник", en: "Monday", lesson: 3 },
+    { ru: "вторник", en: "Tuesday", lesson: 3 },
+    { ru: "среда", en: "Wednesday", lesson: 3 },
+    { ru: "четверг", en: "Thursday", lesson: 3 },
+    { ru: "пятница", en: "Friday", lesson: 3 },
+    { ru: "суббота", en: "Saturday", lesson: 3 },
+    { ru: "воскресенье", en: "Sunday", lesson: 3 },
+    { ru: "неделя", en: "week", lesson: 3 },
+    { ru: "когда", en: "when", lesson: 3 },
+    { ru: "в понедельник", en: "on Monday", lesson: 3 },
+    { ru: "во вторник", en: "on Tuesday", lesson: 3 },
+    { ru: "в среду", en: "on Wednesday", lesson: 3 },
+    { ru: "в четверг", en: "on Thursday", lesson: 3 },
+    { ru: "в пятницу", en: "on Friday", lesson: 3 },
+    { ru: "в субботу", en: "on Saturday", lesson: 3 },
+    { ru: "в воскресенье", en: "on Sunday", lesson: 3 },
+    { ru: "утром", en: "in the morning", lesson: 3 },
+    { ru: "днём", en: "in the afternoon (during the day)", lesson: 3 },
+    { ru: "вчером", en: "in the evening", lesson: 3 },
+    { ru: "сегодня", en: "today", lesson: 3 },
+    { ru: "завтра", en: "tomorrow", lesson: 3 },
+    { ru: "вчера", en: "yesterday", lesson: 3 },
+    { ru: "послезавтра", en: "the day after tomorrow", lesson: 3 },
+    { ru: "позавчера", en: "the day before yesterday", lesson: 3 },
+    { ru: "сейчас", en: "now", lesson: 3 },
+    { ru: "потом", en: "afterwards, later", lesson: 3 },
+    { ru: "раньше", en: "formerly, earlier, before", lesson: 3 },
+    { ru: "рано", en: "early", lesson: 3 },
+    { ru: "поздно", en: "late", lesson: 3 },
+    { ru: "день", en: "day", lesson: 3 },
+    { ru: "дни", en: "days", lesson: 3 },
+    { ru: "Какой сегодня день?", en: "What day is today?", lesson: 3 },
+    { ru: "Который час?", en: "What time is it?", lesson: 3 },
+
+    // LESSON 4
+    { ru: "быть", en: "to be", lesson: 4 },
+    { ru: "Во сколько?", en: "At what time?", lesson: 4 },
+    { ru: "через 10 минут", en: "in ten minutes", lesson: 4 },
+    { ru: "завтрак", en: "breakfast", lesson: 4 },
+    { ru: "обед", en: "lunch", lesson: 4 },
+    { ru: "ужин", en: "dinner", lesson: 4 },
+    { ru: "дома", en: "at home", lesson: 4 },
+    { ru: "на уроке", en: "at the lesson", lesson: 4 },
+    { ru: "хотеть", en: "to want", lesson: 4 },
+
+    // LESSON 5
+    { ru: "купить", en: "to buy", lesson: 5 },
+    { ru: "получить", en: "to receive", lesson: 5 },
+    { ru: "подписать", en: "to sign", lesson: 5 },
+    { ru: "заказать", en: "to order, to book, to reserve", lesson: 5 },
+    { ru: "заплатить", en: "to pay", lesson: 5 },
+    { ru: "сделать", en: "to do, to make", lesson: 5 },
+    { ru: "забыть", en: "to forget", lesson: 5 },
+    { ru: "попросить", en: "to request", lesson: 5 },
+    { ru: "дать", en: "to give", lesson: 5 },
+    { ru: "сказать", en: "to say", lesson: 5 },
+    { ru: "написать", en: "to write", lesson: 5 },
+    { ru: "позвонить", en: "to call", lesson: 5 },
+    { ru: "видеть", en: "to see", lesson: 5 },
+    { ru: "подумать", en: "to think", lesson: 5 },
+    { ru: "открыть", en: "to open", lesson: 5 },
+    { ru: "спросить", en: "to ask", lesson: 5 },
+    { ru: "выучить", en: "to learn", lesson: 5 },
+    { ru: "спать", en: "to sleep", lesson: 5 },
+    { ru: "послать", en: "to send", lesson: 5 },
+    { ru: "прочитать", en: "to read", lesson: 5 },
+    { ru: "решить", en: "to solve, to decide", lesson: 5 },
+    { ru: "посмотреть", en: "to look, to watch", lesson: 5 },
+    { ru: "отменить", en: "to cancel", lesson: 5 },
+    { ru: "закрыть", en: "to close", lesson: 5 },
+    { ru: "ответить", en: "to answer", lesson: 5 },
+    { ru: "взять", en: "to take", lesson: 5 },
+    { ru: "пить", en: "to drink", lesson: 5 },
+    { ru: "курица", en: "chicken", lesson: 5 },
+    { ru: "футбол", en: "football", lesson: 5 },
+    { ru: "опера", en: "opera", lesson: 5 },
+    { ru: "новости", en: "News", lesson: 5 },
+    { ru: "встреча", en: "Meeting", lesson: 5 },
+    { ru: "файл", en: "file", lesson: 5 },
+    { ru: "пропуск", en: "pass", lesson: 5 },
+    { ru: "напитки", en: "drinks", lesson: 5 },
+    { ru: "уже", en: "already", lesson: 5 },
+    { ru: "хороший", en: "good", lesson: 5 },
+    { ru: "за такси", en: "for the taxi", lesson: 5 },
+    { ru: "очень", en: "very", lesson: 5 },
+    { ru: "холодно", en: "cold", lesson: 5 },
+    { ru: "жарко", en: "hot", lesson: 5 },
+    { ru: "ничего", en: "never mind", lesson: 5 },
+    { ru: "только", en: "only", lesson: 5 },
+    { ru: "я открыл", en: "I opened", lesson: 5 },
+    { ru: "это я открыл", en: "it was I who opened", lesson: 5 },
+    { ru: "нужно", en: "it is necessary", lesson: 5 },
+    { ru: "цветы", en: "flowers", lesson: 5 },
+    { ru: "конфеты", en: "candies", lesson: 5 },
+    { ru: "домашнее задание", en: "homework", lesson: 5 },
+    { ru: "задание", en: "task", lesson: 5 },
+    { ru: "без молока", en: "without milk", lesson: 5 },
+    { ru: "что", en: "what, that", lesson: 5 },
+    { ru: "но", en: "but", lesson: 5 },
+    { ru: "тоже", en: "also", lesson: 5 },
+    { ru: "бефстроганов", en: "Stroganoff", lesson: 5 },
+    { ru: "сметана", en: "sour cream", lesson: 5 },
+    { ru: "ой!", en: "oh!", lesson: 5 },
+    { ru: "заказ", en: "order, reservation", lesson: 5 },
+    { ru: "на завтра", en: "for tomorrow", lesson: 5 },
+    { ru: "список", en: "list", lesson: 5 },
+    { ru: "по-английски", en: "in English", lesson: 5 },
+
+    // LESSON 6
+    { ru: "работать", en: "to work", lesson: 6 },
+    { ru: "нигдé", en: "nowhere", lesson: 6 },
+    { ru: "всегдá", en: "always", lesson: 6 },
+    { ru: "иногдá", en: "sometimes", lesson: 6 },
+    { ru: "чáсто", en: "often", lesson: 6 },
+    { ru: "обычно", en: "usually", lesson: 6 },
+    { ru: "никогдá", en: "never", lesson: 6 },
+    { ru: "тóже", en: "also", lesson: 6 },
+    { ru: "кáждый дéнь", en: "every day", lesson: 6 },
+    { ru: "врач", en: "doctor", lesson: 6 },
+    { ru: "дóлжен, должнá, должнí", en: "must / have to / should", lesson: 6 },
+    { ru: "зáнят, занятá, зáняты", en: "busy", lesson: 6 },
+    { ru: "устáть", en: "to tire, to grow tired", lesson: 6 },
+    { ru: "úли", en: "or", lesson: 6 },
+    { ru: "но", en: "but", lesson: 6 },
+    { ru: "мóжет быть", en: "maybe", lesson: 6 },
+    { ru: "слáва бóгу!", en: "thank God!", lesson: 6 },
+    { ru: "как всегдá", en: "as always", lesson: 6 },
+    { ru: "как обычно", en: "as usual", lesson: 6 },
+    { ru: "óтот, óта, óто, óти", en: "this, these", lesson: 6 },
+    { ru: "отдыхáть", en: "to rest, to holiday, to vacation", lesson: 6 },
+
+    // LESSON 7
+    { ru: "Как?", en: "How?", lesson: 7 },
+    { ru: "быстро", en: "quickly", lesson: 7 },
+    { ru: "тихо", en: "quietly", lesson: 7 },
+    { ru: "громко", en: "loudly", lesson: 7 },
+    { ru: "медленно", en: "slowly", lesson: 7 },
+    { ru: "говорить", en: "to speak, to say, to tell", lesson: 7 },
+    { ru: "немного = чуть-чуть", en: "a little", lesson: 7 },
+    { ru: "Как ты думаешь? / Как вы думаете?", en: "What do you think?", lesson: 7 },
+    { ru: "я думаю, что...", en: "I think, that...", lesson: 7 },
+    { ru: "дорого", en: "expensive", lesson: 7 },
+    { ru: "интересно", en: "it's interesting, I wonder", lesson: 7 },
+    { ru: "Почему?", en: "Why?", lesson: 7 },
+    { ru: "по телефону", en: "on the phone", lesson: 7 },
+    { ru: "так", en: "so", lesson: 7 },
+    { ru: "потому что", en: "because", lesson: 7 },
+    { ru: "учить", en: "to learn", lesson: 7 },
+    { ru: "он может", en: "he can", lesson: 7 },
+    { ru: "много лет", en: "many years", lesson: 7 },
+    { ru: "сколько лет", en: "how many years", lesson: 7 },
+    { ru: "китайский язык", en: "Chinese language", lesson: 7 },
+    { ru: "профессор", en: "professor", lesson: 7 },
+    { ru: "аспирант", en: "graduate student", lesson: 7 },
+
+    // LESSON 8
+    { ru: "понимать", en: "to understand", lesson: 8 },
+    { ru: "Повтори! / Повторите!", en: "Repeat! Say it again!", lesson: 8 },
+    { ru: "всё", en: "everything", lesson: 8 },
+    { ru: "упражнение", en: "exercise", lesson: 8 },
+    { ru: "закрыт (-а, -о, -ы)", en: "closed", lesson: 8 },
+    { ru: "открыт (-а, -о, -ы)", en: "open", lesson: 8 },
+    { ru: "знать", en: "to know", lesson: 8 },
+    { ru: "Точно не знаю.", en: "I don't know exactly (for sure).", lesson: 8 },
+    { ru: "ничего", en: "nothing, never mind", lesson: 8 },
+    { ru: "билет", en: "ticket", lesson: 8 },
+    { ru: "новый (-ая, -ое, -ые)", en: "new", lesson: 8 },
+    { ru: "в этом году", en: "this year", lesson: 8 },
+    { ru: "сначала", en: "at first", lesson: 8 },
+    { ru: "многие люди", en: "many people", lesson: 8 },
+    { ru: "самолёт", en: "airplane", lesson: 8 },
+    { ru: "стюардесса", en: "stewardess", lesson: 8 },
+    { ru: "на обед", en: "for lunch", lesson: 8 },
+    { ru: "вкусно", en: "tasty", lesson: 8 },
+    { ru: "вдруг", en: "suddenly", lesson: 8 },
+    { ru: "ненавидишь", en: "you hate", lesson: 8 },
+    { ru: "можно поговорить с...", en: "May I speak with...", lesson: 8 },
+    { ru: "Его нет.", en: "He is out. (He is not here).", lesson: 8 },
+    { ru: "Её нет.", en: "She is out. (She is not here).", lesson: 8 },
+
+    // LESSON 9
+    { ru: "нет денег", en: "no money", lesson: 9 },
+    { ru: "время", en: "time", lesson: 9 },
+    { ru: "нет времени", en: "no time", lesson: 9 },
+    { ru: "всё равно", en: "I don't care", lesson: 9 },
+    { ru: "собака", en: "dog", lesson: 9 },
+    { ru: "кошка", en: "cat", lesson: 9 },
+    { ru: "вопрос", en: "question", lesson: 9 },
+    { ru: "зонт", en: "umbrella", lesson: 9 },
+    { ru: "дача", en: "summer cottage (residence)", lesson: 9 },
+    { ru: "У меня нет ни кошки, ни собаки.", en: "I have neither a cat nor a dog.", lesson: 9 },
+    { ru: "идёт дождь", en: "it's raining", lesson: 9 },
+    { ru: "идёт снег", en: "it's snowing", lesson: 9 },
+    { ru: "правильно", en: "right, correct", lesson: 9 },
+    { ru: "абсолютно", en: "absolutely", lesson: 9 },
+    { ru: "другой (-ая, -ое, -ые)", en: "another (different one)", lesson: 9 },
+    { ru: "слишком много работы", en: "too much work", lesson: 9 },
+    { ru: "буква", en: "letter", lesson: 9 },
+    { ru: "учитель", en: "schoolteacher", lesson: 9 },
+    { ru: "Сколько тебе лет?", en: "How old are you?", lesson: 9 },
+    { ru: "Сколько ему лет?", en: "How old is he?", lesson: 9 },
+    { ru: "вместе", en: "together", lesson: 9 },
+    { ru: "бабочка", en: "butterfly", lesson: 9 },
+    { ru: "день рождения", en: "birthday", lesson: 9 },
+    { ru: "скандал", en: "scandal, fight", lesson: 9 },
+    { ru: "последнее слово", en: "last word", lesson: 9 },
+    { ru: "купи", en: "Buy", lesson: 9 },
+    { ru: "кассир", en: "cashier", lesson: 9 },
+    { ru: "Дайте мне!", en: "Give me!", lesson: 9 },
+    { ru: "я закрою один глаз", en: "I will close one eye", lesson: 9 },
+    { ru: "лично", en: "personally", lesson: 9 },
+    { ru: "женский", en: "ladies", lesson: 9 },
+    { ru: "цвет", en: "color", lesson: 9 },
+    { ru: "фасон", en: "style", lesson: 9 },
+    { ru: "размер", en: "size", lesson: 9 },
+    { ru: "это неважно", en: "it doesn't matter", lesson: 9 },
+    { ru: "всё равно", en: "anyway", lesson: 9 },
+    { ru: "менять", en: "to change", lesson: 9 },
+    { ru: "ну", en: "well", lesson: 9 },
+    { ru: "наверное", en: "probably", lesson: 9 },
+    { ru: "все", en: "all", lesson: 9 },
+    { ru: "без нас", en: "without us", lesson: 9 },
+    { ru: "эпидемия", en: "epidemic", lesson: 9 },
+    { ru: "здоровье", en: "health", lesson: 9 },
+    { ru: "болен (больна, больны)", en: "sick", lesson: 9 },
+    { ru: "Не волнуйтесь!", en: "Don't worry!", lesson: 9 },
+    { ru: "тест", en: "test", lesson: 9 },
+    { ru: "жалко", en: "it's too bad", lesson: 9 },
+
+    // LESSON 10
+    { ru: "любить", en: "to love", lesson: 10 },
+    { ru: "яблочный", en: "apple", lesson: 10 },
+    { ru: "апельсиновый", en: "orange", lesson: 10 },
+    { ru: "томатный", en: "tomato", lesson: 10 },
+    { ru: "ананасовый", en: "pineapple", lesson: 10 },
+    { ru: "тёмное", en: "dark", lesson: 10 },
+    { ru: "свётлое", en: "light", lesson: 10 },
+    { ru: "сладкий", en: "sweet", lesson: 10 },
+    { ru: "несладкий", en: "unsweet, plain", lesson: 10 },
+    { ru: "никто", en: "nobody", lesson: 10 },
+    { ru: "маленький", en: "small", lesson: 10 },
+    { ru: "мультфильмы", en: "cartoons", lesson: 10 },
+    { ru: "голодный", en: "hungry", lesson: 10 },
+    { ru: "просто", en: "just", lesson: 10 },
+    { ru: "много вещей", en: "many things", lesson: 10 },
+    { ru: "пирожок", en: "small pie", lesson: 10 },
+    { ru: "печёные", en: "cookies", lesson: 10 },
+    { ru: "мёд", en: "honey", lesson: 10 },
+    { ru: "подожди", en: "wait", lesson: 10 },
+    { ru: "вещь (-и)", en: "thing (-s)", lesson: 10 },
+    { ru: "кого", en: "whom", lesson: 10 },
+    { ru: "пожениться", en: "to marry", lesson: 10 },
+    { ru: "В чём проблема?", en: "What is the matter?", lesson: 10 },
+    { ru: "дёло", en: "business, deal", lesson: 10 },
+    { ru: "больше", en: "better (with verb нравиться or любить)", lesson: 10 },
+    { ru: "больше всего", en: "most of all (with verb нравиться or любить)", lesson: 10 },
+    { ru: "актёр", en: "actor", lesson: 10 },
+    { ru: "актриса", en: "actress", lesson: 10 },
+    { ru: "живёт", en: "lives", lesson: 10 },
+    { ru: "в центре", en: "downtown", lesson: 10 },
+    { ru: "цветы", en: "flowers", lesson: 10 },
+    { ru: "наоборот", en: "vice versa", lesson: 10 },
+
+    // LESSON 11
+    { ru: "в супермаркете", en: "at the supermarket", lesson: 11 },
+    { ru: "чёрный хлеб", en: "brown (black) bread", lesson: 11 },
+    { ru: "белый хлеб", en: "white bread", lesson: 11 },
+    { ru: "пучок", en: "bunch", lesson: 11 },
+    { ru: "жирный (-ая, -ое, -ые)", en: "fat", lesson: 11 },
+    { ru: "мелочь", en: "small money (coins)", lesson: 11 },
+    { ru: "сухое вино", en: "dry wine", lesson: 11 },
+    { ru: "сладкое вино", en: "sweet wine", lesson: 11 },
+    { ru: "полусухое вино", en: "medium dry wine", lesson: 11 },
+    { ru: "полусладкое вино", en: "medium sweet wine", lesson: 11 },
+    { ru: "вкусный (-ая, -ое, -ые)", en: "tasty", lesson: 11 },
+    { ru: "Какой (-ая, -ое, -ие)?", en: "Which? What kind?", lesson: 11 },
+    { ru: "свежий (-ая, -ее, -ие)", en: "fresh", lesson: 11 },
+    { ru: "вот", en: "here it is", lesson: 11 },
+    { ru: "вот, пожалуйста", en: "here it is, please", lesson: 11 },
+    { ru: "зелень", en: "greens", lesson: 11 },
+    { ru: "ветчина", en: "ham/bacon", lesson: 11 },
+    { ru: "Заказывайте!", en: "Order!", lesson: 11 },
+    { ru: "это вкусно", en: "it's tasty", lesson: 11 },
+    { ru: "Попробуйте!", en: "Try!", lesson: 11 },
+    { ru: "я попробую", en: "I will try (test)", lesson: 11 },
+    { ru: "маринованный чеснок", en: "pickled garlic", lesson: 11 },
+    { ru: "в киоске", en: "at the kiosk", lesson: 11 },
+    { ru: "на рынке", en: "at the market", lesson: 11 },
+    { ru: "на витрине", en: "on display", lesson: 11 },
+    { ru: "в торговом центре", en: "at the shopping center", lesson: 11 },
+    { ru: "покажи (sing) / покажите (pl)", en: "show", lesson: 11 },
+    { ru: "покажите мне, пожалуйста", en: "show me, please", lesson: 11 },
+    { ru: "показать", en: "to show", lesson: 11 },
+    { ru: "беру", en: "I take", lesson: 11 },
+    { ru: "померить", en: "to try on", lesson: 11 },
+    { ru: "размер", en: "size", lesson: 11 },
+    { ru: "слишком", en: "too", lesson: 11 },
+    { ru: "больше", en: "bigger", lesson: 11 },
+    { ru: "меньше", en: "smaller", lesson: 11 },
+    { ru: "принимать карты (аспирин, душ, экзамен)", en: "to take cards (aspirin, a shower, an exam)", lesson: 11 },
+    { ru: "Подходит?", en: "Does it fit?", lesson: 11 },
+    { ru: "наличные", en: "cash", lesson: 11 },
+    { ru: "записаться на", en: "to make an appointment for", lesson: 11 },
+    { ru: "стрижка", en: "haircut", lesson: 11 },
+    { ru: "сейчас посмотрю", en: "I will see", lesson: 11 },
+    { ru: "Приходите!", en: "Come!", lesson: 11 },
+
+    // LESSON 12
+    { ru: "кухня", en: "kitchen", lesson: 12 },
+    { ru: "рынок", en: "market", lesson: 12 },
+    { ru: "здание", en: "building", lesson: 12 },
+    { ru: "на вокзале", en: "at railway station", lesson: 12 },
+    { ru: "на фабрике", en: "in the factory", lesson: 12 },
+    { ru: "на рынке", en: "at the market", lesson: 12 },
+    { ru: "на почте", en: "in the post office", lesson: 12 },
+    { ru: "на юге", en: "in the south", lesson: 12 },
+    { ru: "на востоке", en: "in the east", lesson: 12 },
+    { ru: "на западе", en: "in the west", lesson: 12 },
+    { ru: "на севере", en: "in the north", lesson: 12 },
+    { ru: "в парке", en: "in the park", lesson: 12 },
+    { ru: "в командировке", en: "on a business trip", lesson: 12 },
+    { ru: "в отпуске", en: "on vacation", lesson: 12 },
+    { ru: "диван", en: "sofa", lesson: 12 },
+    { ru: "собрание", en: "internal meeting", lesson: 12 },
+    { ru: "весь день", en: "all day", lesson: 12 },
+    { ru: "весь вечер", en: "all evening", lesson: 12 },
+    { ru: "весь год", en: "all year", lesson: 12 },
+    { ru: "весь месяц", en: "all month", lesson: 12 },
+    { ru: "всё утро", en: "all morning", lesson: 12 },
+    { ru: "холодно", en: "cold", lesson: 12 },
+    { ru: "жарко", en: "hot", lesson: 12 },
+    { ru: "тепло", en: "warm", lesson: 12 },
+    { ru: "на улице", en: "on street/outside", lesson: 12 },
+    { ru: "первое знакомство", en: "first introduction", lesson: 12 },
+    { ru: "преподаватель", en: "teacher", lesson: 12 },
+    { ru: "в январе", en: "in January", lesson: 12 },
+    { ru: "рад (m), рада (f), рады (pl)", en: "glad", lesson: 12 },
+    { ru: "продавец", en: "seller", lesson: 12 },
+    { ru: "гулять", en: "to stroll", lesson: 12 },
+    { ru: "дайте", en: "give", lesson: 12 },
+    { ru: "завтракать", en: "to have breakfast", lesson: 12 },
+    { ru: "официант", en: "waiter", lesson: 12 },
+    { ru: "перерыв", en: "break", lesson: 12 },
+    { ru: "напиток", en: "drink", lesson: 12 },
+    { ru: "пешком", en: "to go (on foot)", lesson: 12 },
+    { ru: "морс", en: "mors (a fruit drink prepared from berries)", lesson: 12 },
+    { ru: "поехать", en: "to go (by transport)", lesson: 12 },
+
+    // LESSON 13
+    { ru: "около", en: "near", lesson: 13 },
+    { ru: "рядом с", en: "next to", lesson: 13 },
+    { ru: "напротив", en: "opposite", lesson: 13 },
+    { ru: "5 минут от метро", en: "5 minutes from the metro", lesson: 13 },
+    { ru: "в центре", en: "in the center (downtown)", lesson: 13 },
+    { ru: "находится", en: "is located", lesson: 13 },
+    { ru: "Где находится?", en: "Where is (it) located?", lesson: 13 },
+    { ru: "старый (-ая, -ое, -ые)", en: "old", lesson: 13 },
+    { ru: "красивый (-ая, -ое, -ые)", en: "beautiful", lesson: 13 },
+    { ru: "год назад", en: "1 year ago", lesson: 13 },
+    { ru: "2, 3, 4 года назад", en: "2, 3, 4 years ago", lesson: 13 },
+    { ru: "5, 6, ... много лет назад", en: "5, 6, ... many years ago", lesson: 13 },
+    { ru: "остановка трамвая", en: "tram stop", lesson: 13 },
+    { ru: "жить", en: "to live", lesson: 13 },
+    { ru: "гостиница", en: "hotel", lesson: 13 },
+    { ru: "он родился / она родилась / они родились", en: "he was born / she was born / they were born", lesson: 13 },
+    { ru: "старший (-ая)", en: "elder/older", lesson: 13 },
+    { ru: "младший (-ая)", en: "younger", lesson: 13 },
+    { ru: "мы встретились", en: "we met", lesson: 13 },
+    { ru: "Что вы предпочитаете?", en: "What do you prefer?", lesson: 13 },
+    { ru: "у меня дома", en: "at my home", lesson: 13 },
+    { ru: "у вас дома", en: "at your home", lesson: 13 },
+    { ru: "в этом году", en: "this year", lesson: 13 },
+    { ru: "в прошлом году", en: "last year", lesson: 13 },
+    { ru: "в следующем году", en: "next year", lesson: 13 },
+    { ru: "на этой неделе", en: "this week", lesson: 13 },
+    { ru: "на прошлой неделе", en: "last week", lesson: 13 },
+    { ru: "на следующей неделе", en: "next week", lesson: 13 },
+    { ru: "давно", en: "a long time ago / for a long time", lesson: 13 },
+    { ru: "в командировке", en: "on a business trip", lesson: 13 },
+    { ru: "я был в гостях", en: "I was a guest (at someone's home)", lesson: 13 },
+    { ru: "сколько раз", en: "how many times", lesson: 13 },
+    { ru: "1 раз / 2, 3, 4 раза / 5, 6, ... 10, ..., много раз", en: "1 time / 2, 3, 4 times / 5, 6, ... 10, ..., many times", lesson: 13 },
+    { ru: "важный (-ая, -ое, -ые)", en: "important", lesson: 13 },
+    { ru: "гости", en: "guests", lesson: 13 },
+    { ru: "летом", en: "in the summer", lesson: 13 },
+    { ru: "зимой", en: "in the winter", lesson: 13 },
+    { ru: "весной", en: "in the spring", lesson: 13 },
+    { ru: "осенью", en: "in the autumn", lesson: 13 },
+    { ru: "погода", en: "weather", lesson: 13 },
+    { ru: "дождь", en: "rain", lesson: 13 },
+    { ru: "ветер", en: "wind", lesson: 13 },
+    { ru: "смотрит в окно", en: "look out the window", lesson: 13 },
+    { ru: "выходной день / выходные дни", en: "day off / days off, weekend", lesson: 13 },
+    { ru: "рабочий день / рабочие дни", en: "workday / workdays", lesson: 13 },
+    { ru: "жалко", en: "it's a pity / it's too bad", lesson: 13 },
+    { ru: "пойти", en: "to go", lesson: 13 },
+    { ru: "давай посмотрим", en: "let's see", lesson: 13 },
+    { ru: "музей современного искусства", en: "museum of modern art", lesson: 13 },
+    { ru: "готов (-а, -ы)", en: "ready", lesson: 13 },
+    { ru: "всё готово", en: "everything is ready", lesson: 13 },
+    { ru: "почти", en: "almost", lesson: 13 },
+    { ru: "первый раз", en: "for the first time", lesson: 13 },
+    { ru: "второй раз", en: "for the second time", lesson: 13 },
+    { ru: "очень близко", en: "very close", lesson: 13 },
+    { ru: "очень далеко", en: "very far", lesson: 13 },
+
+    // LESSON 14
+    { ru: "звонить — позвонить", en: "to call", lesson: 14 },
+    { ru: "часов в 7 = around 7 o'clock", en: "around 7 o'clock", lesson: 14 },
+    { ru: "Спасибо за звонок!", en: "Thank you for calling!", lesson: 14 },
+    { ru: "Вы ошиблись.", en: "You are mistaken.", lesson: 14 },
+    { ru: "Это ошибка.", en: "It is a mistake.", lesson: 14 },
+    { ru: "Вы не туда попали.", en: "You have the wrong number.", lesson: 14 },
+    { ru: "если", en: "if", lesson: 14 },
+    { ru: "код", en: "code", lesson: 14 },
+    { ru: "подарок", en: "gift", lesson: 14 },
+    { ru: "приглашение", en: "invitation", lesson: 14 },
+    { ru: "совет", en: "advise", lesson: 14 },
+    { ru: "помощь", en: "help", lesson: 14 },
+    { ru: "Позвони! / Позвоните!", en: "Call!", lesson: 14 },
+    { ru: "Не звони! / Не звоните!", en: "Don't call!", lesson: 14 },
+    { ru: "лучше", en: "better", lesson: 14 },
+    { ru: "Мы опоздаем на 30 минут.", en: "We will be thirty minutes late.", lesson: 14 },
+    { ru: "после обеда", en: "after lunch", lesson: 14 },
+    { ru: "мобильный (телефон)", en: "cell (phone)", lesson: 14 },
+    { ru: "я хотел(а) бы", en: "I would like", lesson: 14 },
+    { ru: "сначала", en: "at first", lesson: 14 },
+    { ru: "позже", en: "later", lesson: 14 },
+    { ru: "попозже", en: "a little later", lesson: 14 },
+    { ru: "тогда", en: "then", lesson: 14 },
+    { ru: "ладно", en: "okay", lesson: 14 },
+    { ru: "скажем", en: "let's say", lesson: 14 },
+    { ru: "в это время", en: "at this time", lesson: 14 },
+    { ru: "свободен/свободна/свободны/свободно", en: "free, available, not occupied", lesson: 14 },
+    { ru: "мочь", en: "can, to be able", lesson: 14 },
+    { ru: "в любое время", en: "anytime", lesson: 14 },
+    { ru: "вечеринка", en: "party", lesson: 14 },
+
+    // LESSON 15
+    { ru: "Куда ты идёшь?", en: "Where are you going?", lesson: 15 },
+    { ru: "Я иду в театр.", en: "I am going to the theater.", lesson: 15 },
+    { ru: "Куда?", en: "To where?", lesson: 15 },
+    { ru: "идти", en: "To go (on foot), to walk", lesson: 15 },
+    { ru: "ехать", en: "To go (by transport), to drive", lesson: 15 },
+    { ru: "мои друзья", en: "my friends", lesson: 15 },
+    { ru: "в гости", en: "visit friends", lesson: 15 },
+    { ru: "я иду один/одна", en: "I go alone", lesson: 15 },
+    { ru: "болен/больна/больны", en: "sick, ill", lesson: 15 },
+    { ru: "больно", en: "it hurts", lesson: 15 },
+    { ru: "Иди сюда!", en: "Come here!", lesson: 15 },
+    { ru: "Иди туда!", en: "Go there!", lesson: 15 },
+    { ru: "пешком", en: "on foot, walking", lesson: 15 },
+    { ru: "смотреть в окно", en: "to look through the window", lesson: 15 },
+    { ru: "светлые волосы", en: "blond hair", lesson: 15 },
+    { ru: "тёмные глаза", en: "dark eyes", lesson: 15 },
+    { ru: "серьёзные отношения", en: "serious relationship", lesson: 15 },
+    { ru: "спешить", en: "to be in a hurry", lesson: 15 },
+    { ru: "остановка автобуса", en: "bus stop", lesson: 15 },
+    { ru: "пробки", en: "traffic jams", lesson: 15 },
+    { ru: "дворник", en: "janitor", lesson: 15 },
+
+    // LESSON 16
+    { ru: "с удовольствием", en: "I'd love to, with pleasure", lesson: 16 },
+    { ru: "январь — в январе", en: "January — in January", lesson: 16 },
+    { ru: "февраль — в феврале", en: "February — in February", lesson: 16 },
+    { ru: "март — в марте", en: "March — in March", lesson: 16 },
+    { ru: "апрель — в апреле", en: "April — in April", lesson: 16 },
+    { ru: "май — в мае", en: "May — in May", lesson: 16 },
+    { ru: "июнь — в июне", en: "June — in June", lesson: 16 },
+    { ru: "июль — в июле", en: "July — in July", lesson: 16 },
+    { ru: "август — в августе", en: "August — in August", lesson: 16 },
+    { ru: "сентябрь — в сентябре", en: "September — In September", lesson: 16 },
+    { ru: "октябрь — в октябре", en: "October — in October", lesson: 16 },
+    { ru: "ноябрь — в ноябре", en: "November — in November", lesson: 16 },
+    { ru: "декабрь — в декабре", en: "December — in December", lesson: 16 },
+    { ru: "открыт (-а, -о, -ы)", en: "open", lesson: 16 },
+    { ru: "закрыт (-а, -о, -ы)", en: "closed", lesson: 16 },
+
+    // LESSON 17
+    { ru: "предложить", en: "to offer, to suggest", lesson: 17 },
+    { ru: "согласен/согласна/согласны", en: "is (are) agreed/agree", lesson: 17 },
+    { ru: "давай/ давайте", en: "let's", lesson: 17 },
+    { ru: "Давай(те) пойдём!/Поедем!", en: "Let's go!", lesson: 17 },
+    { ru: "Пошли!", en: "Let's go! (immediately)", lesson: 17 },
+    { ru: "одеваться", en: "to dress", lesson: 17 },
+    { ru: "на всё", en: "for (with) everything", lesson: 17 },
+    { ru: "экзотика", en: "exotic", lesson: 17 },
+    { ru: "Закрой(те)!", en: "Close!", lesson: 17 },
+    { ru: "Кремль", en: "Kremlin", lesson: 17 },
+    { ru: "обезьяна", en: "monkey", lesson: 17 },
+    { ru: "платье", en: "dress", lesson: 17 },
+    { ru: "на завтрак", en: "for breakfast", lesson: 17 },
+    { ru: "фонтан", en: "Fountain", lesson: 17 },
+    { ru: "Подожди(те)!", en: "Wait!", lesson: 17 },
+    { ru: "мимо", en: "by, past", lesson: 17 },
+    { ru: "гжель", en: "gzhel (traditional Russian handicraft)", lesson: 17 },
+    { ru: "хохлома", en: "khokhloma (traditional Russian handicraft)", lesson: 17 },
+    { ru: "финифть", en: "enamel (traditional Russian handicraft)", lesson: 17 },
+    { ru: "арка", en: "arch", lesson: 17 },
+    { ru: "нарисован (-а, -ы)", en: "painted", lesson: 17 },
+    { ru: "стрелка", en: "arrow", lesson: 17 },
+    { ru: "субтитры", en: "subtitles", lesson: 17 },
+    { ru: "наличные", en: "cash", lesson: 17 },
+    { ru: "Вы принимаете карты?", en: "Do you take (credit) cards?", lesson: 17 },
+    { ru: "отложить", en: "to put off (away) / to postpone / to set aside", lesson: 17 },
+    { ru: "попали в пробку", en: "got into a traffic jam", lesson: 17 },
+    { ru: "понятно", en: "it is clear", lesson: 17 },
+
+    // LESSON 18
+    { ru: "этáж", en: "floor", lesson: 18 },
+    { ru: "век", en: "century", lesson: 18 },
+    { ru: "страница", en: "page", lesson: 18 },
+    { ru: "подъезд", en: "entrance", lesson: 18 },
+    { ru: "проспект", en: "avenue", lesson: 18 },
+    { ru: "переулок", en: "lane", lesson: 18 },
+    { ru: "проезд", en: "passage", lesson: 18 },
+    { ru: "больница", en: "hospital", lesson: 18 },
+    { ru: "число", en: "date", lesson: 18 },
+    { ru: "Какое сегодня число?", en: "What is the date today?", lesson: 18 },
+    { ru: "Какого числа?", en: "On what date?", lesson: 18 },
+    { ru: "кузен = двоюродный брат", en: "cousin (male)", lesson: 18 },
+    { ru: "кузина = двоюродная сестра", en: "cousin (female)", lesson: 18 },
+    { ru: "тётя", en: "aunt", lesson: 18 },
+    { ru: "дядя", en: "uncle", lesson: 18 },
+    { ru: "племянник", en: "nephew", lesson: 18 },
+    { ru: "племянница", en: "niece", lesson: 18 },
+    { ru: "Откуда?", en: "Where from?", lesson: 18 },
+
+    // LESSON 19
+    { ru: "к нам", en: "to us", lesson: 19 },
+    { ru: "ко мне", en: "to me", lesson: 19 },
+    { ru: "обратно", en: "back", lesson: 19 },
+    { ru: "перезвонить", en: "to call back", lesson: 19 },
+    { ru: "я перезвоню", en: "I will call back", lesson: 19 },
+    { ru: "Перезвони!", en: "Call back!", lesson: 19 },
+    { ru: "целый месяц/день/год/вечер", en: "whole month/day/year/evening", lesson: 19 },
+    { ru: "целую неделю/зиму", en: "whole week/winter", lesson: 19 },
+    { ru: "целое лето/утро", en: "whole summer/morning", lesson: 19 },
+    { ru: "кстати", en: "by the way", lesson: 19 },
+    { ru: "надолго", en: "for a long time", lesson: 19 },
+    { ru: "значит", en: "it means", lesson: 19 },
+    { ru: "А что?", en: "Why? (Why do you ask?)", lesson: 19 },
+    { ru: "мне кажется", en: "it seems to me / I would say", lesson: 19 },
+    { ru: "уверен (-а, -ы)", en: "Sure", lesson: 19 },
+    { ru: "фонетическая ошибка", en: "phonetic mistake", lesson: 19 },
+    { ru: "ошибка", en: "error, mistake", lesson: 19 },
+    { ru: "сразу", en: "immediately", lesson: 19 },
+    { ru: "скоро", en: "soon", lesson: 19 },
+    { ru: "покурить", en: "to smoke", lesson: 19 },
+    { ru: "встречать", en: "to meet and pick up", lesson: 19 },
+    { ru: "опоздать", en: "to be late", lesson: 19 },
+    { ru: "паспортный контроль", en: "passport control", lesson: 19 },
+    { ru: "очередь", en: "queue, line", lesson: 19 },
+    { ru: "дворец (дворцы)", en: "palace(s)", lesson: 19 },
+    { ru: "надеюсь", en: "I hope", lesson: 19 },
+    { ru: "когда как", en: "it depends", lesson: 19 },
+    { ru: "оставить", en: "to leave", lesson: 19 },
+    { ru: "интуиция", en: "intuition", lesson: 19 },
+    { ru: "рейс", en: "flight", lesson: 19 },
+    { ru: "скучный", en: "boring", lesson: 19 },
+    { ru: "нереально", en: "not real / not realistic", lesson: 19 },
+    { ru: "вовремя", en: "on time", lesson: 19 },
+    { ru: "Посмотрим!", en: "We will see!", lesson: 19 },
+    { ru: "Сколько лет, сколько зим!", en: "We haven't seen each other for so long!", lesson: 19 },
+    { ru: "Что ты делаешь сегодня вечером?", en: "What are you doing this evening?", lesson: 19 },
+    { ru: "мы договоримся конкретно", en: "we will work out the details", lesson: 19 },
+    { ru: "Договорились!", en: "Agreed!", lesson: 19 },
+
+    // LESSON 20
+    { ru: "вернуться", en: "to return, to come back", lesson: 20 },
+    { ru: "из гостей", en: "from the place (home) where I was a visiting", lesson: 20 },
+    { ru: "(я) боюсь", en: "I am afraid", lesson: 20 },
+    { ru: "только что", en: "just now", lesson: 20 },
+    { ru: "Что случилось?", en: "What happened?", lesson: 20 },
+    { ru: "Подожди(те) минутку!", en: "Wait a minute!", lesson: 20 },
+    { ru: "Как вы тут?", en: "How are you doing here?", lesson: 20 },
+    { ru: "к сожалению", en: "unfortunately", lesson: 20 },
+    { ru: "особенно", en: "especially, particularly", lesson: 20 },
+    { ru: "арендовать", en: "to rent", lesson: 20 },
+    { ru: "пешеходная зона", en: "pedestrian zone", lesson: 20 },
+    { ru: "приключение", en: "Adventure", lesson: 20 },
+    { ru: "припарковать", en: "to park", lesson: 20 },
+    { ru: "на стене дома", en: "on the wall of the building", lesson: 20 },
+    { ru: "табличка", en: "sign", lesson: 20 },
+    { ru: "название", en: "name", lesson: 20 },
+    { ru: "Как называется?", en: "What is the name?", lesson: 20 },
+    { ru: "одинаково", en: "the same, equally", lesson: 20 },
+    { ru: "администратор", en: "administrator, the front-desk clerk", lesson: 20 },
+    { ru: "одностороннее движение", en: "one-way street", lesson: 20 },
+    { ru: "главный (-ая, -ое, -ые)", en: "the main (thing)", lesson: 20 },
+
+    // LESSON 21
+    { ru: "как только", en: "as soon as", lesson: 21 },
+    { ru: "я скажу ему/ей/им", en: "I will tell him/her/them", lesson: 21 },
+    { ru: "скажите ему/ей/им", en: "tell him/her/them", lesson: 21 },
+    { ru: "Что ему/ей/им передать?", en: "Can I take message for him/ her/ them", lesson: 21 },
+    { ru: "Вы можете ему передать?", en: "Can you give him a message?", lesson: 21 },
+    { ru: "Пусть он/она перезвонит мне.", en: "Have him/her call me back", lesson: 21 },
+    { ru: "много людей", en: "a lot of people", lesson: 21 },
+    { ru: "заранее", en: "in advance", lesson: 21 },
+    { ru: "достаточно/хватит", en: "enough", lesson: 21 },
+    { ru: "полезно", en: "useful/healthy", lesson: 21 },
+    { ru: "вредно", en: "not good, harmful, unhealthy", lesson: 21 },
+    { ru: "на обеде (обедает)", en: "have lunch", lesson: 21 },
+    { ru: "неважно", en: "it is not important, doesn't matter", lesson: 21 },
+    { ru: "важно", en: "it is important", lesson: 21 },
+    { ru: "грустный(-ая)", en: "sad", lesson: 21 },
+    { ru: "такой(-ая) грустный(-ая)", en: "so sad", lesson: 21 },
+    { ru: "срочно", en: "urgently", lesson: 21 },
+    { ru: "Садись! / Садитесь!", en: "Take a seat!", lesson: 21 },
+    { ru: "недавно", en: "not long ago, recently", lesson: 21 },
+    { ru: "Я устал как собака!", en: "I'm as tired as a dog!", lesson: 21 },
+    { ru: "Я голодный(-ая) как волк!", en: "I'm as hungry as a wolf!", lesson: 21 },
+    { ru: "пальто", en: "coat", lesson: 21 },
+    { ru: "Это безобразие!", en: "What a mess!", lesson: 21 },
+    { ru: "записка", en: "note", lesson: 21 },
+    { ru: "Было хорошо?", en: "Was it fun?", lesson: 21 },
+    { ru: "все другие слова", en: "all other words", lesson: 21 },
+    { ru: "дурак/дура", en: "fool", lesson: 21 },
+    { ru: "«Лебединое озеро»", en: "Swan Lake", lesson: 21 },
+    { ru: "в районе", en: "in the area", lesson: 21 },
+    { ru: "отчёт", en: "report", lesson: 21 },
+    { ru: "по дороге", en: "on the way", lesson: 21 },
+    { ru: "договоримся", en: "we will agree", lesson: 21 },
+    { ru: "отлично", en: "excellent", lesson: 21 },
+    { ru: "Купить вино? (Открыть окно? Сделать кофе? Послать эсэмэску?)", en: "Shall I buy wine? (Shall I open the window? Shall I make coffee? Shall I send a text message?)", lesson: 21 },
+    { ru: "давай(те) встретимся", en: "let's meet", lesson: 21 },
+    { ru: "поработать", en: "to work a little", lesson: 21 },
+    { ru: "пригласить", en: "to invite", lesson: 21 },
+    { ru: "расписание", en: "schedule, timetable", lesson: 21 },
+    { ru: "собираться", en: "to plan, to intend, to be going (i.e., going to do something)", lesson: 21 }
+];
+
+// Deduplicate per lesson
+const allVocab = rawVocab.filter((v, i, self) =>
+    i === self.findIndex(x => x.ru === v.ru && x.lesson === v.lesson)
+);
+
+const lessonsMap = {};
+allVocab.forEach(v => {
+    if (!lessonsMap[v.lesson]) lessonsMap[v.lesson] = [];
+    lessonsMap[v.lesson].push(v);
+});
+const lessonNumbers = Object.keys(lessonsMap).map(Number).sort((a,b) => a-b);
+
+// ============================================================
+//  DOM
+// ============================================================
+const lessonGrid = document.getElementById('lessonGrid');
+const picturePanel = document.getElementById('picturePanel');
+const picLessonName = document.getElementById('picLessonName');
+const vocabPicture = document.getElementById('vocabPicture');
+const expandBtn = document.getElementById('expandBtn');
+const quizTypeSection = document.getElementById('quizTypeSection');
+const quizContainer = document.getElementById('quizContainer');
+const progressText = document.getElementById('progressText');
+const retryInfo = document.getElementById('retryInfo');
+const questionText = document.getElementById('questionText');
+const optionsContainer = document.getElementById('optionsContainer');
+const inputContainer = document.getElementById('inputContainer');
+const answerInput = document.getElementById('answerInput');
+const submitAnswerBtn = document.getElementById('submitAnswerBtn');
+const feedbackMessage = document.getElementById('feedbackMessage');
+const restartQuizBtn = document.getElementById('restartQuizBtn');
+const quizInfo = document.getElementById('quizInfo');
+
+// ============================================================
+//  STATE
+// ============================================================
+let currentLesson = null;
+let currentQuizType = null;
+let currentQuestions = [];
+let originalQuestions = [];
+let currentIndex = 0;
+let wrongQuestions = [];
+let answered = false;
+let waitingRetry = false;
+let advanceTimeout = null;
+let showAllVocab = false;
+
+// ============================================================
+//  SPEAK RUSSIAN
+// ============================================================
+function speakRussian(text) {
+    if (!text || !('speechSynthesis' in window)) return;
+    // Clean up text: remove parenthetical hints, brackets, and latin letters
+    let clean = text
+        .replace(/\[[^\]]*\]/g, '')
+        .replace(/\([^)]*\)/g, '')
+        .replace(/[a-zA-Z«»"]/g, '')
+        .replace(/[—–-]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+    if (!clean) clean = text;
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(clean);
+    u.lang = 'ru-RU';
+    u.rate = 0.85;
+    window.speechSynthesis.speak(u);
+}
+
+// ============================================================
+//  VOCAB PICTURE (tap to hear)
+// ============================================================
+function renderVocabPicture(lesson) {
+    const items = lessonsMap[lesson] || [];
+    picLessonName.textContent = `Lesson ${lesson} (${items.length} words)`;
+    vocabPicture.innerHTML = '';
+    const limit = showAllVocab ? items.length : 24;
+    items.slice(0, limit).forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'vocab-item';
+        div.dataset.ru = item.ru;
+        div.innerHTML = `<span class="ru">${item.ru}</span><span class="en">${item.en}</span>`;
+        div.addEventListener('click', () => playVocabItem(div, item.ru));
+        vocabPicture.appendChild(div);
+    });
+    if (items.length > 24) {
+        expandBtn.classList.remove('hidden');
+        expandBtn.textContent = showAllVocab ? `Show less` : `Show all ${items.length}`;
+    } else {
+        expandBtn.classList.add('hidden');
+    }
+}
+
+function playVocabItem(el, ruText) {
+    // Highlight
+    document.querySelectorAll('.vocab-item.playing').forEach(e => e.classList.remove('playing'));
+    el.classList.add('playing');
+    speakRussian(ruText);
+    // Remove highlight after speech ends (approx 2s fallback)
+    clearTimeout(el._hl);
+    el._hl = setTimeout(() => el.classList.remove('playing'), 1500);
+}
+
+expandBtn.addEventListener('click', () => {
+    showAllVocab = !showAllVocab;
+    if (currentLesson) renderVocabPicture(currentLesson);
+});
+
+// ============================================================
+//  LESSONS
+// ============================================================
+function renderLessons() {
+    lessonGrid.innerHTML = '';
+    lessonNumbers.forEach(num => {
+        const count = (lessonsMap[num] || []).length;
+        const btn = document.createElement('button');
+        btn.className = 'lesson-btn';
+        btn.textContent = `Lesson ${num} (${count})`;
+        btn.dataset.lesson = num;
+        btn.addEventListener('click', () => selectLesson(num));
+        lessonGrid.appendChild(btn);
+    });
+    document.getElementById('lessonCount').textContent = `${lessonNumbers.length} lessons`;
+}
+
+function selectLesson(num) {
+    currentLesson = num;
+    showAllVocab = false;
+    document.querySelectorAll('.lesson-btn').forEach(b => b.classList.remove('active'));
+    const activeBtn = document.querySelector(`.lesson-btn[data-lesson="${num}"]`);
+    if (activeBtn) activeBtn.classList.add('active');
+
+    picturePanel.classList.remove('hidden');
+    renderVocabPicture(num);
+    quizTypeSection.classList.remove('hidden');
+    quizContainer.classList.add('hidden');
+
+    document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+    currentQuizType = null;
+    const count = (lessonsMap[num] || []).length;
+    quizInfo.textContent = `This lesson has ${count} words. All will be used in the quiz.`;
+    resetQuizState();
+}
+
+function resetQuizState() {
+    if (advanceTimeout) clearTimeout(advanceTimeout);
+    questionText.innerHTML = '';
+    optionsContainer.innerHTML = '';
+    inputContainer.classList.add('hidden');
+    answerInput.value = '';
+    answerInput.disabled = false;
+    submitAnswerBtn.disabled = false;
+    feedbackMessage.textContent = '';
+    feedbackMessage.className = 'feedback';
+    retryInfo.textContent = '';
+    currentQuestions = [];
+    originalQuestions = [];
+    wrongQuestions = [];
+    currentIndex = 0;
+    answered = false;
+    waitingRetry = false;
+}
+
+// ============================================================
+//  QUIZ START
+// ============================================================
+function startQuiz(type) {
+    if (!currentLesson) { alert('Please select a lesson first.'); return; }
+    currentQuizType = type;
+    document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+    const typeBtn = document.querySelector(`.type-btn[data-type="${type}"]`);
+    if (typeBtn) typeBtn.classList.add('active');
+
+    const pool = lessonsMap[currentLesson] || [];
+    if (pool.length === 0) { alert('No vocabulary for this lesson.'); return; }
+
+    resetQuizState();
+
+    const shuffled = [...pool].sort(() => Math.random() - 0.5);
+    originalQuestions = shuffled;
+    currentQuestions = [...originalQuestions];
+    wrongQuestions = [];
+    currentIndex = 0;
+    waitingRetry = false;
+
+    quizContainer.classList.remove('hidden');
+    renderQuestion();
+}
+
+// ============================================================
+//  RENDER QUESTION
+// ============================================================
+function renderQuestion() {
+    if (advanceTimeout) { clearTimeout(advanceTimeout); advanceTimeout = null; }
+
+    if (currentIndex >= currentQuestions.length) {
+        if (wrongQuestions.length > 0) {
+            currentQuestions = [...wrongQuestions];
+            wrongQuestions = [];
+            currentIndex = 0;
+            waitingRetry = true;
+            renderQuestion();
+            return;
+        } else {
+            questionText.innerHTML = '🎉 Quiz complete! All correct!';
+            optionsContainer.innerHTML = '';
+            inputContainer.classList.add('hidden');
+            feedbackMessage.textContent = 'Excellent! You got everything right.';
+            feedbackMessage.className = 'feedback correct';
+            progressText.textContent = 'Done!';
+            retryInfo.textContent = '';
+            return;
+        }
+    }
+
+    const q = currentQuestions[currentIndex];
+    if (!q) { currentIndex++; renderQuestion(); return; }
+
+    progressText.textContent = `Question ${currentIndex + 1} of ${currentQuestions.length}` +
+        (waitingRetry ? ' (retry round)' : '');
+    retryInfo.textContent = wrongQuestions.length > 0 ? `⏳ ${wrongQuestions.length} to retry` : '';
+
+    answered = false;
+    feedbackMessage.textContent = '';
+    feedbackMessage.className = 'feedback';
+    optionsContainer.innerHTML = '';
+    optionsContainer.style.display = 'grid';
+    inputContainer.classList.add('hidden');
+    answerInput.disabled = false;
+    submitAnswerBtn.disabled = false;
+
+    if (currentQuizType === 'ru-en') renderRuEn(q);
+    else if (currentQuizType === 'en-ru') renderEnRu(q);
+    else if (currentQuizType === 'write-ru') renderWriteRu(q);
+}
+
+function renderRuEn(q) {
+    questionText.innerHTML = `<span>${q.ru}</span> <button class="speaker-btn" id="speakBtn" title="Listen">🔊</button>`;
+    const sb = document.getElementById('speakBtn');
+    if (sb) sb.addEventListener('click', (e) => { e.stopPropagation(); speakRussian(q.ru); });
+
+    const pool = lessonsMap[currentLesson] || [];
+    const distractors = pool.filter(v => v.en !== q.en).sort(() => Math.random() - 0.5).slice(0, 3);
+    let options = [q, ...distractors];
+    while (options.length < 4) options.push({ ru: '—', en: '—' });
+    options = options.sort(() => Math.random() - 0.5);
+
+    options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.textContent = opt.en;
+        btn.dataset.correct = (opt.en === q.en) ? 'true' : 'false';
+        btn.addEventListener('click', () => handleMCQ(btn, q, opt.en === q.en));
+        optionsContainer.appendChild(btn);
+    });
+}
+
+function renderEnRu(q) {
+    questionText.innerHTML = `<span>${q.en}</span>`;
+    const pool = lessonsMap[currentLesson] || [];
+    const distractors = pool.filter(v => v.ru !== q.ru).sort(() => Math.random() - 0.5).slice(0, 3);
+    let options = [q, ...distractors];
+    while (options.length < 4) options.push({ ru: '—', en: '—' });
+    options = options.sort(() => Math.random() - 0.5);
+
+    options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.textContent = opt.ru;
+        btn.dataset.correct = (opt.ru === q.ru) ? 'true' : 'false';
+        btn.addEventListener('click', () => {
+            if (!answered) speakRussian(opt.ru);
+            handleMCQ(btn, q, opt.ru === q.ru);
+        });
+        optionsContainer.appendChild(btn);
+    });
+}
+
+function renderWriteRu(q) {
+    questionText.innerHTML = `<span>${q.en}</span>`;
+    optionsContainer.innerHTML = '';
+    optionsContainer.style.display = 'none';
+    inputContainer.classList.remove('hidden');
+    answerInput.value = '';
+    answerInput.disabled = false;
+    submitAnswerBtn.disabled = false;
+    submitAnswerBtn.textContent = 'Check';
+    answerInput.focus();
+}
+
+submitAnswerBtn.addEventListener('click', () => {
+    if (currentQuizType !== 'write-ru') return;
+    if (answered) return;
+    if (currentIndex >= currentQuestions.length) return;
+    const q = currentQuestions[currentIndex];
+    if (!q) return;
+    const userAnswer = answerInput.value.trim();
+    const isCorrect = userAnswer.toLowerCase() === q.ru.toLowerCase();
+    handleWrite(q, isCorrect);
+});
+
+answerInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && currentQuizType === 'write-ru' && !answered) {
+        e.preventDefault();
+        submitAnswerBtn.click();
+    }
+});
+
+// ============================================================
+//  HANDLERS
+// ============================================================
+function handleMCQ(btn, q, isCorrect) {
+    if (answered) return;
+    answered = true;
+    document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
+
+    if (isCorrect) {
+        btn.classList.add('correct');
+        feedbackMessage.textContent = '✅ Correct!';
+        feedbackMessage.className = 'feedback correct';
+        advanceTimeout = setTimeout(() => { currentIndex++; renderQuestion(); }, 700);
+    } else {
+        btn.classList.add('wrong');
+        document.querySelectorAll('.option-btn').forEach(b => {
+            if (b.dataset.correct === 'true') b.classList.add('correct');
+        });
+        feedbackMessage.textContent = `❌ Incorrect. Right answer: ${currentQuizType === 'ru-en' ? q.en : q.ru}`;
+        feedbackMessage.className = 'feedback wrong';
+        if (!wrongQuestions.some(w => w.ru === q.ru && w.en === q.en)) wrongQuestions.push(q);
+        speakRussian(q.ru);
+        advanceTimeout = setTimeout(() => { currentIndex++; renderQuestion(); }, 1800);
+    }
+}
+
+function handleWrite(q, isCorrect) {
+    if (answered) return;
+    answered = true;
+    answerInput.disabled = true;
+    submitAnswerBtn.disabled = true;
+
+    if (isCorrect) {
+        feedbackMessage.textContent = '✅ Correct!';
+        feedbackMessage.className = 'feedback correct';
+        advanceTimeout = setTimeout(() => { currentIndex++; renderQuestion(); }, 700);
+    } else {
+        feedbackMessage.textContent = `❌ Incorrect. Correct: ${q.ru}`;
+        feedbackMessage.className = 'feedback wrong';
+        if (!wrongQuestions.some(w => w.ru === q.ru && w.en === q.en)) wrongQuestions.push(q);
+        speakRussian(q.ru);
+        advanceTimeout = setTimeout(() => { currentIndex++; renderQuestion(); }, 2000);
+    }
+}
+
+// ============================================================
+//  LISTENERS
+// ============================================================
+document.querySelectorAll('.type-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => startQuiz(e.currentTarget.dataset.type));
+});
+
+restartQuizBtn.addEventListener('click', () => {
+    if (currentLesson && currentQuizType) startQuiz(currentQuizType);
+});
+
+// ============================================================
+//  INIT
+// ============================================================
+renderLessons();
+</script>
+</body>
+</html>
